@@ -21,21 +21,9 @@ node_lidar_t node_lidar;
 
 //#define ENCRYPTION_T
 
-using std::placeholders::_1;
-
-class MinimalSubscriber : public rclcpp::Node
+/*lidar_status 话题回调: 1 start, 2 stop, 3/4 exposure, 5 clear error, 6/7 speed*/
+static void lidar_status_callback(const std_msgs::msg::UInt16::SharedPtr msg)
 {
-  public:
-    MinimalSubscriber()
-    : Node("m1ct_d2")
-    {
-      subscription_ = this->create_subscription<std_msgs::msg::UInt16>(
-      "lidar_status", 10, std::bind(&MinimalSubscriber::topic_callback, this, _1));
-    }
-
-  private:
-    void topic_callback(const std_msgs::msg::UInt16::SharedPtr msg) const
-    {
 		switch (msg->data)
 		{
 			/*启动雷达*/
@@ -79,10 +67,7 @@ class MinimalSubscriber : public rclcpp::Node
 			default:
 				break;
 		}
-     // RCLCPP_INFO(this->get_logger(), "I heard: '%s'", msg->data.c_str());
-    }
-    rclcpp::Subscription<std_msgs::msg::UInt16>::SharedPtr subscription_;
-};
+}
 
 node_lidar_t::~node_lidar_t(){
   	if(scan_node_buf)
@@ -305,6 +290,7 @@ result_t grabScanData(uint32_t timeout) {
 			{
 				node_lidar._lock.lock();
 				if (node_lidar.scan_node_count == 0) {
+					node_lidar._lock.unlock();
 					return RESULT_FAIL;
 				}
 				node_lidar._lock.unlock();
@@ -357,7 +343,6 @@ int send_lidar_data(LaserScan &outscan)
 		outscan.config.scan_time =  static_cast<float>(scan_time * 1.0 / 1e9);
     	outscan.config.time_increment = outscan.config.scan_time / (double)(count - 1);
 		outscan.stamp = node_lidar.lidar_time.scan_start_time;
-		std::cout << "scantime:" << outscan.config.scan_time << "stamp:" << outscan.stamp << std::endl;
 		//scan_msg->header.frame_id = node_lidar.lidar_general_info.frame_id;
 		//scan_msg->header.stamp = ros::Time::now();
 
@@ -407,8 +392,6 @@ int send_lidar_data(LaserScan &outscan)
 				outscan.points.push_back(point);
 			}
 
-			node_lidar._lock.unlock();
-
 			/*雷达被遮挡判断*/
 			
 			node_lidar.optimize_lidar.lidar_blocked_judge(count);
@@ -423,6 +406,7 @@ int send_lidar_data(LaserScan &outscan)
 		}
 	}
 	node_lidar._lock.unlock();
+	return 0;
 }
 
 /*设置串口信息的函数*/
@@ -528,37 +512,25 @@ void topic_callback(const std_msgs::msg::UInt16::SharedPtr msg)
 	}
 }*/
 
-int topic_thread()
-{
-	rclcpp::spin(std::make_shared<MinimalSubscriber>());
-}
-
 int node_start(int argc, char **argv)
 {
 
-	
-	rclcpp::init(argc, argv);
-	auto node = rclcpp::Node::make_shared("c1ct_d2");
-	
-	node->declare_parameter("port");
-  	node->get_parameter("port", node_lidar.lidar_general_info.port);
-	
-	node->declare_parameter("baudrate");
-  	node->get_parameter("baudrate", node_lidar.lidar_general_info.m_SerialBaudrate);
 
-	node->declare_parameter("frame_id");
-  	node->get_parameter("frame_id", node_lidar.lidar_general_info.frame_id);
-	
-	node->declare_parameter("version");
-  	node->get_parameter("version", node_lidar.lidar_general_info.version);
+	rclcpp::init(argc, argv);
+	auto node = rclcpp::Node::make_shared("m1ct_d2");
+
+	/*默认值取自 lidar_general_info; 波特率由 version 决定 (见 initialize)*/
+	auto &info = node_lidar.lidar_general_info;
+	info.port = node->declare_parameter("port", info.port);
+	info.frame_id = node->declare_parameter("frame_id", info.frame_id);
+	info.version = node->declare_parameter("version", info.version);
 	//std::string frame_id = "base_scan";
 	rclcpp::Publisher<std_msgs::msg::String>::SharedPtr error_pub;
 	error_pub = node->create_publisher<std_msgs::msg::String>("lsd_error", 10);
 	std_msgs::msg::String pubdata;
-	/*
-	auto subscription_ = node->create_subscription<std_msgs::msg::UInt16>(
-      "lidar_status", 10, topic_callback);*/
-	
+	auto status_sub = node->create_subscription<std_msgs::msg::UInt16>(
+      "lidar_status", 10, lidar_status_callback);
+
 	
 	bool ret_init = initialize();
 
@@ -578,7 +550,7 @@ int node_start(int argc, char **argv)
 	thread t1(read_forever);
 	t1.detach();
 
-	thread t2(topic_thread);
+	thread t2([node]{ rclcpp::spin(node); });
 	t2.detach();
 
 	/*处理雷达数据的线程*/
@@ -618,7 +590,7 @@ int node_start(int argc, char **argv)
 			sleep(1);
 		}
 		LaserScan scan;
-		if(data_handling(scan))
+		if(data_handling(scan) && !scan.points.empty())
 		{
 			auto scan_msg = std::make_shared<sensor_msgs::msg::LaserScan>();
 
@@ -630,7 +602,7 @@ int node_start(int argc, char **argv)
 			scan_msg->header.frame_id = node_lidar.lidar_general_info.frame_id;
 
 			scan_msg->angle_min = scan.config.min_angle;
-			scan_msg->angle_max = scan.config.max_angle;
+			scan_msg->angle_max = scan.config.min_angle + scan.config.angle_increment * (scan.points.size() - 1);
 			scan_msg->angle_increment = scan.config.angle_increment;
 			scan_msg->scan_time = scan.config.scan_time;
 			scan_msg->time_increment = scan.config.time_increment;

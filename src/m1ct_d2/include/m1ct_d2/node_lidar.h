@@ -21,7 +21,7 @@ using namespace std;
 /*雷达基本信息*/
 typedef struct{
   int version = 1; //雷达版本
-  string port = "/dev/sc_mini";     //串口名称
+  string port = "/dev/coin_d6";     //串口名称
   int m_SerialBaudrate = 230400;   //波特率
   bool m_intensities = false;
   uint64_t m_PointTime = 1e9/5000; 

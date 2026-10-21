@@ -1,18 +1,5 @@
-m1ct_d2_node:
+/**:
   ros__parameters:
-    port: /dev/sc_mini
+    port: /dev/coin_d6      # udev symlink, see udev/99-coin-d6.rules
     frame_id: laser_link
-    ignore_array: ""
-    baudrate: 230400
-    samp_rate: 9
-    resolution_fixed: true
-    singleChannel: false
-    auto_reconnect: true
-    reversion: true
-    isToFLidar: false
-    angle_max: 180.0
-    angle_min: -180.0
-    max_range: 16.0
-    min_range: 0.01
-    frequency: 10.0
-    version: 4
+    version: 4              # 4 = COIN-D6 / M1CT-D2 (230400 baud, sets baud automatically)
