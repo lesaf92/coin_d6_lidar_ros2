@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <string.h>
 #include "node_lidar.h"
 
 int parse_args(int argc, char **argv)
@@ -96,7 +97,17 @@ int main(int argc, char **argv)
 	node_lidar.lidar_general_info.version = 4;
 	//node_lidar.laser_pub = n.advertise<sensor_msgs::LaserScan>("scan", 1);
 	
-	parse_args(argc, argv);
+	/*只解析 --ros-args 之前的参数: getopt 会重排 argv, 打乱 ROS 参数*/
+	int own_argc = argc;
+	for (int i = 1; i < argc; i++)
+	{
+		if (strcmp(argv[i], "--ros-args") == 0)
+		{
+			own_argc = i;
+			break;
+		}
+	}
+	parse_args(own_argc, argv);
 
 	node_start(argc, argv);
 }                                                                                                           

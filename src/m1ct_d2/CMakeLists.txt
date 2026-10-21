@@ -13,9 +13,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(visualization_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
-#find_package(rosidl_default_generators REQUIRED)
+find_package(std_msgs REQUIRED)
 
 set(SDK_PATH "./src/")
 
@@ -32,9 +30,11 @@ add_executable(m1ct_d2 ${SDK_SRC})
 ament_target_dependencies(m1ct_d2
   "rclcpp"
   "sensor_msgs"
-  "visualization_msgs"
-  "geometry_msgs"
+  "std_msgs"
 )
+
+# getTime() -> CLOCK_REALTIME so LaserScan stamps match ROS time
+target_compile_definitions(m1ct_d2 PRIVATE HAS_CLOCK_GETTIME=1)
 
 
 
@@ -42,9 +42,6 @@ install(TARGETS
   m1ct_d2
   DESTINATION lib/${PROJECT_NAME})
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-endif()
+install(DIRECTORY params DESTINATION share/${PROJECT_NAME})
 
 ament_package()
