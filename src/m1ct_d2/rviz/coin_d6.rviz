@@ -1,0 +1,46 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+      Enabled: true
+      Cell Size: 1
+      Plane Cell Count: 20
+      Value: true
+    - Class: rviz_default_plugins/LaserScan
+      Name: LaserScan
+      Enabled: true
+      Topic:
+        Value: /scan
+        Reliability Policy: Best Effort
+        Depth: 5
+      Style: Points
+      Size (Pixels): 3
+      Color Transformer: Intensity
+      Value: true
+    - Class: rviz_default_plugins/Axes
+      Name: Axes
+      Enabled: true
+      Length: 0.3
+      Radius: 0.02
+      Value: true
+  Global Options:
+    Fixed Frame: base_link
+    Background Color: 48; 48; 48
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/TopDownOrtho
+      Name: Current View
+      Scale: 80
+      X: 0
+      Y: 0
+      Value: TopDownOrtho (rviz_default_plugins)
+Window Geometry:
+  Width: 1200
+  Height: 800

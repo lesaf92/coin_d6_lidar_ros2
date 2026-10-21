@@ -42,6 +42,7 @@ install(TARGETS
   m1ct_d2
   DESTINATION lib/${PROJECT_NAME})
 
-install(DIRECTORY params DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY params launch rviz DESTINATION share/${PROJECT_NAME})
+install(FILES 99-coin-d6.rules DESTINATION share/${PROJECT_NAME})
 
 ament_package()

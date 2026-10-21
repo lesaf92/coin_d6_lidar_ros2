@@ -1,0 +1,4 @@
+# COIN-D6 lidar (CH340 USB-serial adapter, 1a86:7523) -> /dev/coin_d6 on any USB port.
+# The CH340 has no serial number, so any other CH340 device plugged in also matches;
+# see README for pinning to a physical port instead.
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", SYMLINK+="coin_d6"

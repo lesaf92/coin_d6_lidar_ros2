@@ -1,5 +1,5 @@
 /**:
   ros__parameters:
-    port: /dev/coin_d6      # udev symlink, see udev/99-coin-d6.rules
+    port: /dev/coin_d6      # udev symlink, see 99-coin-d6.rules
     frame_id: laser_link
     version: 4              # 4 = COIN-D6 / M1CT-D2 (230400 baud, sets baud automatically)
