@@ -1,6 +1,6 @@
 # COIN-D6 lidar — ROS 2 driver
 
-ROS 2 (Jazzy) driver for the **COIN-D6** 360° dToF 2D lidar (Guoke Optoelectronics / CSPC,
+ROS 2 (Humble and Jazzy) driver for the **COIN-D6** 360° dToF 2D lidar (Guoke Optoelectronics / CSPC,
 also sold by XTARK and WitMotion). It reads the sensor through the bundled CH340 USB-serial
 adapter and publishes `sensor_msgs/LaserScan` on `/scan`.
 
@@ -24,7 +24,7 @@ sudo cp src/m1ct_d2/99-coin-d6.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules && sudo udevadm trigger
 
 # build
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash   # or /opt/ros/jazzy on Jazzy
 colcon build --symlink-install
 source install/setup.bash
 
