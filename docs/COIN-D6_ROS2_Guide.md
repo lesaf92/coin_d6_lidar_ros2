@@ -10,7 +10,8 @@ labelled:
 
 - **vendor**: taken from the vendor spec sheet or manuals, not checked by us
 - **measured**: observed on our unit with this driver (Ubuntu 24.04, ROS 2 Jazzy, the CH340
-  USB adapter that ships with the sensor, indoor room)
+  USB adapter that ships with the sensor, indoor room). The driver also builds and runs on
+  Ubuntu 22.04 with ROS 2 Humble.
 
 Contents
 
@@ -179,7 +180,7 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 ls -l /dev/coin_d6            # -> ttyUSB*
 
 # build
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash   # or /opt/ros/jazzy on Jazzy
 colcon build --symlink-install
 source install/setup.bash
 
@@ -388,7 +389,7 @@ Expected output: about 30 revolutions, about 4000 samples/s, `bad=0`.
 - The "blocked" check counts no-return points, so it can stop the driver in large open
   areas (§6).
 - Stop doesn't stop the sensor (§8).
-- Tested on ROS 2 Jazzy only.
+- Builds and runs on ROS 2 Humble and Jazzy; hardware-tested on Jazzy.
 
 ## 11. Vendor resources
 
@@ -411,7 +412,7 @@ Not included in this repo (copyright). They come with the sensor or from the ven
 The first commit in this repo is the untouched vendor package, so `git log -p` shows
 everything. Summary:
 
-- builds on Jazzy: `declare_parameter` defaults, missing `std_msgs` dependency
+- builds on Humble and Jazzy: `declare_parameter` defaults, missing `std_msgs` dependency
 - one node instead of two, so launch-file renaming and remapping work
 - the parameter YAML is actually applied (its node name never matched before)
 - vendor `getopt` parsing no longer scrambles `--ros-args`
